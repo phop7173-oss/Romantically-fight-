@@ -1,9 +1,13 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.prisma = void 0;
-const client_1 = require("@prisma/client");
+import { PrismaClient } from '@prisma/client';
+import { env } from '../config/env.js';
 const globalForPrisma = globalThis;
-exports.prisma = globalForPrisma.prisma ?? new client_1.PrismaClient();
-if (process.env.NODE_ENV !== 'production') {
-    globalForPrisma.prisma = exports.prisma;
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+    datasources: {
+        db: {
+            url: env.DATABASE_URL,
+        },
+    },
+});
+if (env.NODE_ENV !== 'production') {
+    globalForPrisma.prisma = prisma;
 }

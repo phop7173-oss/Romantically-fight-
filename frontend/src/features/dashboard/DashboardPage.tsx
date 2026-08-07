@@ -1,44 +1,50 @@
-import { motion } from 'framer-motion';
-import CoupleSetupForm from './CoupleSetupForm';
-import { useCoupleStore } from '../../store/useCoupleStore';
-import { Card } from '../../components/ui';
-
-const cards = [
-  { title: 'Today', body: 'Plan a quiet dinner and share three things you appreciate about each other.' },
-  { title: 'This week', body: 'Review your shared goals and keep the momentum of your connection alive.' },
-  { title: 'Next milestone', body: 'Create space for a meaningful conversation and capture the vibe in your journal.' },
-];
+import { useQuery } from '@tanstack/react-query';
+import { getDashboardData } from './dashboard-data';
+import { OverviewCard } from './components/OverviewCard';
+import { NextDateCard } from './components/NextDateCard';
+import { RemindersCard } from './components/RemindersCard';
+import { BucketListCard } from './components/BucketListCard';
+import { MemoriesCard } from './components/MemoriesCard';
+import { QuickActionsCard } from './components/QuickActionsCard';
 
 export default function DashboardPage() {
-  const profileName = useCoupleStore((state) => state.profileName);
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: getDashboardData,
+  });
+
+  if (isPending) {
+    return <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-slate-300">Loading your shared dashboard...</div>;
+  }
+
+  if (isError || !data) {
+    return <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-8 text-rose-300">We could not load your dashboard right now.</div>;
+  }
 
   return (
     <div className="space-y-6">
-      <Card className="bg-white/10 backdrop-blur">
-        <p className="text-sm uppercase tracking-[0.3em] text-pink-200">Couple dashboard</p>
-        <h1 className="mt-3 text-3xl font-semibold">Welcome back to {profileName}.</h1>
-        <p className="mt-3 max-w-2xl text-slate-300">
-          This starter view is organized for future modules like rituals, plans, chats, memory boards, and relationship insights.
+      <header className="rounded-3xl border border-white/10 bg-white/10 p-6 shadow-soft backdrop-blur">
+        <p className="text-sm uppercase tracking-[0.3em] text-pink-200">Shared dashboard</p>
+        <h1 className="mt-2 text-3xl font-semibold text-white">A calm view of your relationship</h1>
+        <p className="mt-2 max-w-2xl text-sm text-slate-300">
+          Designed as a flexible home for future widgets, rituals, and shared planning experiences.
         </p>
-      </Card>
+      </header>
 
-      <div className="grid gap-4 md:grid-cols-[1fr_0.7fr]">
-        <div className="grid gap-4 md:grid-cols-2">
-          {cards.map((card, index) => (
-            <motion.article
-              key={card.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.08 }}
-            >
-              <Card>
-                <h2 className="text-lg font-semibold">{card.title}</h2>
-                <p className="mt-2 text-sm text-slate-400">{card.body}</p>
-              </Card>
-            </motion.article>
-          ))}
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-4">
+          <OverviewCard name={data.relationshipName} anniversary={data.anniversary} daysLeft={data.anniversaryCountdownDays} />
+          <div className="grid gap-4 lg:grid-cols-2">
+            <NextDateCard title={data.nextDate.title} when={data.nextDate.when} details={data.nextDate.details} />
+            <RemindersCard reminders={data.reminders} />
+          </div>
         </div>
-        <CoupleSetupForm />
+
+        <div className="space-y-4">
+          <BucketListCard completed={data.bucketList.completed} total={data.bucketList.total} items={data.bucketList.items} />
+          <MemoriesCard memories={data.memories} />
+          <QuickActionsCard actions={data.actions} />
+        </div>
       </div>
     </div>
   );

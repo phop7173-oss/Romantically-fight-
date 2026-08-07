@@ -1,24 +1,8 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import couplesRouter from './routes/couples';
-import authRouter from './routes/auth';
+import { createApp } from './app.js';
+import { env } from './config/env.js';
 
-dotenv.config();
+const app = createApp();
 
-const app = express();
-const port = Number(process.env.PORT ?? 3000);
-
-app.use(cors());
-app.use(express.json());
-
-app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'romantically-fight-api' });
-});
-
-app.use('/api/auth', authRouter);
-app.use('/api/couples', couplesRouter);
-
-app.listen(port, () => {
-  console.log(`API listening on http://localhost:${port}`);
+app.listen(env.PORT, () => {
+  console.log(`API listening on http://localhost:${env.PORT}`);
 });

@@ -2,16 +2,16 @@ import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { registerUser, loginUser, createInvite, acceptInvite } from '../../api/auth';
-import { useAuthStore } from '../../store/useAuthStore';
 import { Button, Card, Input } from '../../components/ui';
+import { useAuthStore } from '../../store/useAuthStore';
+import AuthForm from './components/AuthForm';
+
+type AuthMode = 'login' | 'register';
 
 export default function AuthPage() {
   const navigate = useNavigate();
   const { setAuth, user } = useAuthStore();
-  const [mode, setMode] = useState<'login' | 'register'>('register');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState<AuthMode>('register');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteToken, setInviteToken] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -52,44 +52,31 @@ export default function AuthPage() {
     onError: (error: Error) => setMessage(error.message),
   });
 
+  const handleAuthSubmit = (values: { name?: string; email: string; password: string }) => {
+    if (mode === 'register') {
+      registerMutation.mutate({ name: values.name ?? '', email: values.email, password: values.password });
+      return;
+    }
+
+    loginMutation.mutate({ email: values.email, password: values.password });
+  };
+
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-10 lg:px-8">
       <Card>
         <h1 className="text-3xl font-semibold">Authentication and couple linking</h1>
-        <p className="mt-2 text-sm text-slate-400">This view is the first integration point for registration, login, and invitation flows.</p>
+        <p className="mt-2 text-sm text-slate-400">This flow combines form validation, secure auth, and future-ready couple setup in one place.</p>
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
         <Card>
-          <div className="mb-4 flex gap-2">
-            <Button variant={mode === 'register' ? 'primary' : 'secondary'} onClick={() => setMode('register')}>
-              Register
-            </Button>
-            <Button variant={mode === 'login' ? 'primary' : 'secondary'} onClick={() => setMode('login')}>
-              Login
-            </Button>
-          </div>
-
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (mode === 'register') {
-                registerMutation.mutate({ name, email, password });
-              } else {
-                loginMutation.mutate({ email, password });
-              }
-            }}
-            className="space-y-3"
-          >
-            {mode === 'register' ? <Input label="Name" value={name} onChange={(event) => setName(event.target.value)} /> : null}
-            <Input label="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-            <Input label="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
-            <Button type="submit" className="w-full">
-              {mode === 'register' ? 'Create account' : 'Sign in'}
-            </Button>
-          </form>
-
-          {message ? <p className="mt-3 text-sm text-slate-300">{message}</p> : null}
+          <AuthForm
+            mode={mode}
+            onModeChange={setMode}
+            onSubmit={handleAuthSubmit}
+            isPending={registerMutation.isPending || loginMutation.isPending}
+            error={message}
+          />
         </Card>
 
         <Card>

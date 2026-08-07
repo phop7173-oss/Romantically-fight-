@@ -1,63 +1,54 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const auth_1 = require("../validation/auth");
-const auth_2 = require("../services/auth");
-const auth_3 = require("../middleware/auth");
-const router = (0, express_1.Router)();
+import { Router } from 'express';
+import { registerSchema, loginSchema, inviteSchema, acceptInvitationSchema } from '../validation/auth.js';
+import { registerUser, loginUser, createInvitation, acceptInvitation } from '../services/auth.js';
+import { requireAuth } from '../middleware/auth.js';
+import { toApiError } from '../utils/errors.js';
+const router = Router();
 router.post('/register', async (req, res) => {
     try {
-        const parsed = auth_1.registerSchema.parse(req.body);
-        const result = await (0, auth_2.registerUser)(parsed);
+        const parsed = registerSchema.parse(req.body);
+        const result = await registerUser(parsed);
         return res.status(201).json(result);
     }
     catch (error) {
-        if (error instanceof Error) {
-            return res.status(400).json({ error: error.message });
-        }
-        return res.status(400).json({ error: 'Invalid registration payload.' });
+        const payload = toApiError(error, 'Invalid registration payload.');
+        return res.status(400).json({ message: payload.message, code: payload.code });
     }
 });
 router.post('/login', async (req, res) => {
     try {
-        const parsed = auth_1.loginSchema.parse(req.body);
-        const result = await (0, auth_2.loginUser)(parsed);
+        const parsed = loginSchema.parse(req.body);
+        const result = await loginUser(parsed);
         return res.json(result);
     }
     catch (error) {
-        if (error instanceof Error) {
-            return res.status(401).json({ error: error.message });
-        }
-        return res.status(401).json({ error: 'Invalid login payload.' });
+        const payload = toApiError(error, 'Invalid login payload.');
+        return res.status(401).json({ message: payload.message, code: payload.code });
     }
 });
-router.post('/invites', auth_3.requireAuth, async (req, res) => {
+router.post('/invites', requireAuth, async (req, res) => {
     try {
-        const parsed = auth_1.inviteSchema.parse(req.body);
-        const result = await (0, auth_2.createInvitation)(req.user.id, parsed.email);
+        const parsed = inviteSchema.parse(req.body);
+        const result = await createInvitation(req.user.id, parsed.email);
         return res.status(201).json(result);
     }
     catch (error) {
-        if (error instanceof Error) {
-            return res.status(400).json({ error: error.message });
-        }
-        return res.status(400).json({ error: 'Invalid invite payload.' });
+        const payload = toApiError(error, 'Invalid invite payload.');
+        return res.status(400).json({ message: payload.message, code: payload.code });
     }
 });
-router.post('/invites/accept', auth_3.requireAuth, async (req, res) => {
+router.post('/invites/accept', requireAuth, async (req, res) => {
     try {
-        const parsed = auth_1.acceptInvitationSchema.parse(req.body);
-        const result = await (0, auth_2.acceptInvitation)({ token: parsed.token, userId: req.user.id });
+        const parsed = acceptInvitationSchema.parse(req.body);
+        const result = await acceptInvitation({ token: parsed.token, userId: req.user.id });
         return res.json(result);
     }
     catch (error) {
-        if (error instanceof Error) {
-            return res.status(400).json({ error: error.message });
-        }
-        return res.status(400).json({ error: 'Invalid invite acceptance payload.' });
+        const payload = toApiError(error, 'Invalid invite acceptance payload.');
+        return res.status(400).json({ message: payload.message, code: payload.code });
     }
 });
-router.get('/me', auth_3.requireAuth, async (req, res) => {
+router.get('/me', requireAuth, async (req, res) => {
     return res.json({ user: req.user });
 });
-exports.default = router;
+export default router;

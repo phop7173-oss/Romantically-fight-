@@ -3,6 +3,7 @@ generator client {
 }
 
 datasource db {
+  // SQLite is the default for local development. Switch to postgresql for production deployments.
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
