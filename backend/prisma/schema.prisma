@@ -22,11 +22,13 @@ model User {
 }
 
 model Couple {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  members   User[]
+  id              Int      @id @default(autoincrement())
+  name            String
+  anniversaryDate DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  members         User[]
+  dates           Date[]
 }
 
 model Invitation {
@@ -39,4 +41,18 @@ model Invitation {
   updatedAt  DateTime @updatedAt
   inviter    User     @relation("InviterInvitations", fields: [inviterId], references: [id])
   invitee    User     @relation("InviteeInvitations", fields: [inviteeId], references: [id])
+}
+
+model Date {
+  id          Int      @id @default(autoincrement())
+  coupleId    Int
+  title       String
+  scheduledAt DateTime
+  details     String?
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  couple      Couple   @relation(fields: [coupleId], references: [id])
+
+  @@index([coupleId, scheduledAt])
 }

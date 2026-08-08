@@ -1,1 +1,19 @@
-node_modules
+node_modules/
+.env
+.env.*
+!.env.example
+
+# SQLite
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Build output
+dist/
+build/
+frontend/dist/
+backend/dist/
+
+# Logs
+*.log
+npm-debug.log*
