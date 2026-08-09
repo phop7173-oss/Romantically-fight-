@@ -3,6 +3,7 @@ import express from 'express';
 import authRouter from './routes/auth.js';
 import couplesRouter from './routes/couples.js';
 import dashboardRouter from './routes/dashboard.js';
+import datesRouter from './routes/dates.js';
 import healthRouter from './routes/health.js';
 
 export function createApp() {
@@ -15,6 +16,7 @@ export function createApp() {
   app.use('/api/auth', authRouter);
   app.use('/api/couples', couplesRouter);
   app.use('/api/couples', dashboardRouter);
+  app.use('/api/couples', datesRouter);
 
   return app;
 }

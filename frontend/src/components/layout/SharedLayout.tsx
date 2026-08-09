@@ -4,6 +4,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 
 const links = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/dates', label: 'Dates' },
   { to: '/foundation', label: 'Foundation' },
 ];
 

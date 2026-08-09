@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import LandingPage from './features/landing/LandingPage';
 import AuthPage from './features/auth/AuthPage';
 import DashboardPage from './features/dashboard/DashboardPage';
+import DatesPage from './features/dates/DatesPage';
 import PlaceholderPage from './features/placeholder/PlaceholderPage';
 import SharedLayout from './components/layout/SharedLayout';
 import { useAuthStore } from './store/useAuthStore';
@@ -22,6 +23,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dates"
+          element={
+            <ProtectedRoute>
+              <DatesPage />
             </ProtectedRoute>
           }
         />

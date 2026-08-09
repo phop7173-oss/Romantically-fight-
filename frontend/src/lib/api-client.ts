@@ -3,6 +3,10 @@ export type ApiErrorShape = {
   error?: string;
 };
 
+function toBearerToken(token: string): string {
+  return token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+}
+
 function getStoredToken(): string | null {
   if (typeof window === 'undefined') {
     return null;
@@ -24,7 +28,7 @@ export async function apiClient<T>(path: string, init?: RequestInit): Promise<T>
     headers: {
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
-      ...(token ? { Authorization: token } : {}),
+      ...(token ? { Authorization: toBearerToken(token) } : {}),
     },
     ...init,
   });
@@ -32,6 +36,10 @@ export async function apiClient<T>(path: string, init?: RequestInit): Promise<T>
   if (!response.ok) {
     const payload = (await response.json().catch(() => ({}))) as ApiErrorShape;
     throw new Error(payload.message ?? payload.error ?? 'Request failed.');
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;
